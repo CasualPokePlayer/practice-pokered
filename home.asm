@@ -3458,6 +3458,22 @@ WaitForTextScrollButtonPress::
 	ld [H_DOWNARROWBLINKCNT2], a
 	pop af
 	ld [H_DOWNARROWBLINKCNT1], a
+	push af
+	push bc
+	ldh a,[$FFEF]
+	inc a
+	inc a
+	cp $0A
+	jr z,.notlikethis
+	ldh [$FFEF],a
+	add $EF
+	ld c,a
+	ld a,[wIgnoreInputCounter]
+	cpl
+	ld [$FF00+c],a
+.notlikethis
+	pop bc
+	pop af
 	ret
 
 ; (unless in link battle) waits for A or B being pressed and outputs the scrolling sound effect
@@ -4716,3 +4732,56 @@ const_value = 1
 	add_tx_pre BookOrSculptureText                  ; 40
 	add_tx_pre ElevatorText                         ; 41
 	add_tx_pre PokemonStuffText                     ; 42
+
+
+; b  = number of bytes
+; de = pointer to input byte stream
+; hl = pointer to output text buffer
+PrintHex::
+.loop
+	ld a,[de]
+	swap a
+	call PrintHexDigit
+	ld a,[de]
+	call PrintHexDigit
+	inc de
+	dec b
+	jr nz,.loop
+	ret
+
+PrintHexDigit::
+	and $0F
+	add $F6
+	jr nc,.number
+	add $80
+.number
+	ldi [hl],a
+	ret
+	
+; a = 2 nibbles to write
+; de = pointer to input byte stream
+; hl = pointer to output text buffer 
+PrintType_:
+	ldh [hSwapTemp],a
+	swap a
+	and $0F
+	call NumberJumpTable
+	inc hl
+	inc hl
+	ld [hl],$F3
+	inc hl
+	ldh a,[hSwapTemp]
+	and $0F
+	
+NumberJumpTable:
+	push hl
+	ld hl, TypeNames
+	add a
+	ld e, a
+	ld d, $0
+	add hl, de
+	ld a, [hli]
+	ld e, a
+	ld d, [hl]
+	pop hl
+	jp PlaceString

@@ -49,6 +49,24 @@ DrawHP_:
 	ld bc, SCREEN_WIDTH + 1 ; below bar
 .printFraction
 	add hl, bc
+	push af
+	ld a,[wIsInBattle]
+	and a
+	jr nz,.printfractionproper
+	pop af
+	ld de,$FFF9
+	lb bc, 2, 3
+	call PrintNumber
+	ld a, "/"
+	ld [hli], a
+	ld de,$FFFD
+	lb bc, 2, 3
+	call PrintNumber
+	pop hl
+	pop de
+	ret
+.printfractionproper
+	pop af
 	ld de, wLoadedMonHP
 	lb bc, 2, 3
 	call PrintNumber
@@ -146,7 +164,7 @@ StatusScreen:
 	ld de, wd11e
 	lb bc, LEADING_ZEROES | 1, 3
 	call PrintNumber ; Pokémon no.
-	coord hl, 11, 10
+	coord hl, 12, 10
 	predef PrintMonType
 	ld hl, NamePointers2
 	call .GetStringPointer
@@ -161,9 +179,9 @@ StatusScreen:
 	coord hl, 12, 16
 	call PlaceString ; OT
 	coord hl, 12, 14
-	ld de, wLoadedMonOTID
-	lb bc, LEADING_ZEROES | 2, 5
-	call PrintNumber ; ID Number
+	ld de, wLoadedMonDVs
+	ld b,$02
+	call PrintHex ; DVs now
 	ld d, $0
 	call PrintStatsBox
 	call Delay3
@@ -205,23 +223,23 @@ NamePointers2:
 	dw wDayCareMonName
 
 Type1Text:
-	db "TYPE1/", $4e
+	db "DVs Dec/", $4e
 
 Type2Text:
-	db "TYPE2/", $4e
+	db $4e
 
 IDNoText:
-	db $73, "№/", $4e
+	db "DVs Hex/", $4e
 
 OTText:
 	db   "OT/"
 	next "@"
 
 StatusText:
-	db "STATUS/@"
+	db "Y/N BX 1/"
 
 OKText:
-	db "OK@"
+	db "2@"
 
 ; Draws a line starting from hl high b and wide c
 DrawLineBox:
@@ -271,14 +289,14 @@ PrintStatsBox:
 	pop hl
 	pop bc
 	add hl, bc
-	ld de, wLoadedMonAttack
+	ld de,$FFF0
 	lb bc, 2, 3
 	call PrintStat
-	ld de, wLoadedMonDefense
+	ld de,$FFF2
 	call PrintStat
-	ld de, wLoadedMonSpeed
+	ld de,$FFF4
 	call PrintStat
-	ld de, wLoadedMonSpecial
+	ld de,$FFF6
 	jp PrintNumber
 PrintStat:
 	push hl
@@ -289,10 +307,10 @@ PrintStat:
 	ret
 
 StatsText:
-	db   "ATTACK"
-	next "DEFENSE"
-	next "SPEED"
-	next "SPECIAL@"
+	db   "TXTBX1"
+	next "TXTBX2"
+	next "TXTBX3"
+	next "TXTBX4@"
 
 StatusScreen2:
 	ld a, [hTilesetType]

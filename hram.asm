@@ -310,13 +310,13 @@ hCoordsInFrontOfPlayerMatch EQU $FFEA
 
 hSpriteAnimFrameCounter EQU $FFEA
 
-H_WHOSETURN EQU $FFF3 ; 0 on player’s turn, 1 on enemy’s turn
+H_WHOSETURN EQU $FFFB ; 0 on player’s turn, 1 on enemy’s turn
 
 ; bit 0: draw HP fraction to the right of bar instead of below (for party menu)
 ; bit 1: menu is double spaced
 hFlags_0xFFF6 EQU $FFF6
 
-hFieldMoveMonMenuTopMenuItemX EQU $FFF7
+hFieldMoveMonMenuTopMenuItemX EQU $FFFC
 
 hDisableJoypadPolling EQU $FFF9
 

@@ -451,6 +451,14 @@ DisplayTwoOptionMenu:
 	bit 1, a ; A button pressed?
 	jr nz, .choseSecondMenuItem ; automatically choose the second option if B is pressed
 .pressedAButton
+	push bc
+	ldh a,[$FFEF]
+	add $F6
+	ld c,a
+	ld a,[wIgnoreInputCounter]
+	cpl
+	ld [$FF00+c],a
+	pop bc
 	ld a, [wCurrentMenuItem]
 	ld [wChosenMenuItem], a
 	and a
@@ -464,6 +472,14 @@ DisplayTwoOptionMenu:
 	and a
 	ret
 .choseSecondMenuItem
+	push bc
+	ldh a,[$FFEF]
+	add $F6
+	ld c,a
+	ld a,[wIgnoreInputCounter]
+	cpl
+	ld [$FF00+c],a
+	pop bc
 	ld a, 1
 	ld [wCurrentMenuItem], a
 	ld [wChosenMenuItem], a

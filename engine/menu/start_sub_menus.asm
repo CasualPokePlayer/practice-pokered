@@ -587,26 +587,45 @@ DrawTrainerInfo:
 	call TrainerInfo_DrawVerticalLine
 	coord hl, 19, 10
 	call TrainerInfo_DrawVerticalLine
-	coord hl, 6, 9
+	coord hl, 1, 9
 	ld de, TrainerInfo_BadgesText
 	call PlaceString
-	coord hl, 2, 2
+	coord hl, 1, 2
 	ld de, TrainerInfo_NameMoneyTimeText
 	call PlaceString
-	coord hl, 7, 2
-	ld de, wPlayerName
-	call PlaceString
+	coord hl, 5, 2
+	ld de,wPlayerID
+	lb bc, LEADING_ZEROES | 2, 5
+	call PrintNumber
+	ld [hl], $f3 ; slash tile ID
+	inc hl
+	ld de,wPlayerID
+	ld b,$02
+	call PrintHex
+	ld a, SRAM_ENABLE
+	ld [MBC1SRamEnable], a
+	ld a, $1
+	ld [MBC1SRamBankingMode], a
+	ld [MBC1SRamBank], a
 	coord hl, 8, 4
-	ld de, wPlayerMoney
-	ld c, $e3
-	call PrintBCDNumber
-	coord hl, 9, 6
-	ld de, wPlayTimeHours ; hours
-	lb bc, LEFT_ALIGN | 1, 3
+	ld de, $ACF0 ; save seconds
+	lb bc, LEADING_ZEROES | 1, 2
 	call PrintNumber
 	ld [hl], $d6 ; colon tile ID
 	inc hl
-	ld de, wPlayTimeMinutes ; minutes
+	ld de, $ACF1 ; save frames
+	lb bc, LEADING_ZEROES | 1, 2
+	call PrintNumber
+	xor a
+	ld [MBC1SRamBank], a
+	ld [MBC1SRamBankingMode], a
+	coord hl, 8, 6
+	ld de, wPlayTimeSeconds ; seconds
+	lb bc, LEADING_ZEROES | 1, 2
+	call PrintNumber
+	ld [hl], $d6 ; colon tile ID
+	inc hl
+	ld de, wPlayTimeFrames ; frames
 	lb bc, LEADING_ZEROES | 1, 2
 	jp PrintNumber
 
@@ -615,13 +634,13 @@ TrainerInfo_FarCopyData:
 	jp FarCopyData2
 
 TrainerInfo_NameMoneyTimeText:
-	db   "NAME/"
-	next "MONEY/"
-	next "TIME/@"
+	db   "TID"
+	next "SavIGT"
+	next "CurIGT@"
 
-; $76 is a circle tile
+; $ED is black right arrow tile
 TrainerInfo_BadgesText:
-	db $76,"BADGES",$76,"@"
+	db "IGT ",$ED," Second:Frame@"
 
 ; draws a text box on the trainer info screen
 ; height is always 6
